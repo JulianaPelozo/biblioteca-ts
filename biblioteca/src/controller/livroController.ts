@@ -2,66 +2,81 @@ import { Request, Response } from "express";
 import { LivroRepository } from "../repository/livroRepository";
 
 export class LivroController {
-  
-  static async criar(req: Request, res: Response) {
-    try {
-      const { titulo, autor, isbn, anoPublicacao, disponivel } = req.body;
 
-      if (!titulo || !autor || !isbn || !anoPublicacao) {
-        return res.status(400).json({ erro: "Campos obrigatórios faltando" });
-      }
+    static async criar(req: Request, res: Response) {
+        try {
+            const { titulo, autor, isbn, anoPublicacao, disponivel } = req.body;
 
-      const livro = LivroRepository.create({
-        titulo,
-        autor,
-        isbn,
-        anoPublicacao,
-        disponivel,
-      });
+            if (!titulo || !autor || !isbn || !anoPublicacao) {
+                return res.status(400).json({ erro: "Campos obrigatórios faltando" });
+            }
 
-      const salvo = await LivroRepository.save(livro);
-      res.status(201).json(salvo);
-    } catch (err) {
-      res.status(500).json({ erro: "Erro ao criar livro" });
+            const livro = LivroRepository.create({
+                titulo,
+                autor,
+                isbn,
+                anoPublicacao,
+                disponivel,
+            });
+
+            const salvo = await LivroRepository.save(livro);
+            res.status(201).json(salvo);
+        } catch (err) {
+            res.status(500).json({ erro: "Erro ao criar livro" });
+        }
     }
-  }
 
-  static async listarTodos(req: Request, res: Response) {
-    const livros = await LivroRepository.find();
-    return res.json(livros);
-  }
+    static async listarTodos(req: Request, res: Response) {
+        const livros = await LivroRepository.find();
+        return res.json(livros);
+    }
 
-  static async listarPorId(req: Request, res: Response) {
-    const { id } = req.params;
-    const livro = await LivroRepository.findOneBy({ id: Number(id) });
+    static async listarPorId(req: Request, res: Response) {
+        const { id } = req.params;
 
-    if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
+        const numId = Number(id);
+        if (isNaN(numId)) {
+            return res.status(400).json({ erro: "ID inválido" });
+        }
 
-    return res.json(livro);
-  }
+        const livro = await LivroRepository.findOneBy({ id: numId });
 
-  static async atualizar(req: Request, res: Response) {
-    const { id } = req.params;
+        if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
 
-    const livro = await LivroRepository.findOneBy({ id: Number(id) });
-    if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
+        return res.json(livro);
+    }
+    static async atualizar(req: Request, res: Response) {
+        const { id } = req.params;
 
-    const dados = req.body;
-    Object.assign(livro, dados);
+        const numId = Number(id);
+        if (isNaN(numId)) {
+            return res.status(400).json({ erro: "ID inválido" });
+        }
 
-    const atualizado = await LivroRepository.save(livro);
+        const livro = await LivroRepository.findOneBy({ id: Number(id) });
+        if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
 
-    return res.json(atualizado);
-  }
+        const dados = req.body;
+        Object.assign(livro, dados);
 
-  static async excluir(req: Request, res: Response) {
-    const { id } = req.params;
+        const atualizado = await LivroRepository.save(livro);
 
-    const livro = await LivroRepository.findOneBy({ id: Number(id) });
-    if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
+        return res.json(atualizado);
+    }
 
-    await LivroRepository.delete(id);
+    static async excluir(req: Request, res: Response) {
+        const { id } = req.params;
 
-    return res.json({ mensagem: "Livro removido com sucesso" });
-  }
+        const numId = Number(id);
+        if (isNaN(numId)) {
+            return res.status(400).json({ erro: "ID inválido" });
+        }
+
+        const livro = await LivroRepository.findOneBy({ id: Number(id) });
+        if (!livro) return res.status(404).json({ erro: "Livro não encontrado" });
+
+        await LivroRepository.delete(id);
+
+        return res.json({ mensagem: "Livro removido com sucesso" });
+    }
 }
