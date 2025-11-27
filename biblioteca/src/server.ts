@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 AppDataSource.initialize().then(() => {
-  console.log("📚 Conectado ao MySQL!");
+  console.log("Conectado ao MySQL!");
 
   app.post("/api/livros", LivroController.criar);
   app.get("/api/livros", LivroController.listarTodos);
@@ -14,5 +14,5 @@ AppDataSource.initialize().then(() => {
   app.put("/api/livros/:id", LivroController.atualizar);
   app.delete("/api/livros/:id", LivroController.excluir);
 
-  app.listen(3000, () => console.log("🚀 API rodando na porta 3000"));
+  app.listen(3000, () => console.log("API rodando na porta 3000"));
 });
